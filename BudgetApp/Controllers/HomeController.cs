@@ -15,11 +15,21 @@ namespace BudgetApp.Controllers
 
         public IActionResult Index()
         {
-            return View();
-        }
+            BudgetCategory budgCatIns = new BudgetCategory
+            {
+                CategoryName = "Fast Food",
+                Amount = (decimal)100.00
+            };
 
-        public IActionResult Privacy()
-        {
+            using (BudgetAppContext dc = new BudgetAppContext())
+            {
+
+                //dc.BudgetCategories.Add(budgCatIns);
+                //dc.SaveChanges();
+
+                List<BudgetCategory> budgetCats = dc.BudgetCategories.ToList();
+            }
+
             return View();
         }
 

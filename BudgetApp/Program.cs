@@ -1,8 +1,11 @@
+using BudgetApp.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddDbContext<BudgetAppContext>(option => option.UseSqlServer("server=(localdb)\\MSSQLLocalDB;database=BudgetApp;"));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
