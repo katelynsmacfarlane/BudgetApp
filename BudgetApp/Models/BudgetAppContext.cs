@@ -40,19 +40,20 @@ public partial class BudgetAppContext : DbContext
 
         modelBuilder.Entity<CategoryMapping>(entity =>
         {
-            entity.HasKey(e => e.Cmid).HasName("PK__tmp_ms_x__F67C768E5F88192A");
+            entity.HasKey(e => e.Cmid).HasName("PK__Category__F67C76EE65D31085");
 
             entity.ToTable("CategoryMapping");
 
-            entity.Property(e => e.Cmid).HasColumnName("CMId");
+            entity.Property(e => e.Cmid).HasColumnName("CMID");
             entity.Property(e => e.CategoryName)
                 .HasMaxLength(100)
                 .IsUnicode(false);
-            entity.Property(e => e.Keyword).IsUnicode(false);
+            entity.Property(e => e.Keyword)
+                .HasMaxLength(100)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.CategoryNameNavigation).WithMany(p => p.CategoryMappings)
                 .HasForeignKey(d => d.CategoryName)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CategoryMapping_BudgetCategory");
         });
 

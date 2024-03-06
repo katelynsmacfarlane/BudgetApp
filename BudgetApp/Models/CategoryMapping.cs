@@ -9,7 +9,7 @@ public partial class CategoryMapping
 
     public string Keyword { get; set; } = null!;
 
-    public string CategoryName { get; set; } = null!;
+    public string? CategoryName { get; set; }
 
-    public virtual BudgetCategory CategoryNameNavigation { get; set; } = null!;
+    public virtual BudgetCategory? CategoryNameNavigation { get; set; }
 }
