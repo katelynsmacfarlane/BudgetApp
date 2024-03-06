@@ -16,4 +16,6 @@ public partial class BudgetCategory
     public decimal Amount { get; set; }
 
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    public virtual ICollection<CategoryMapping> CategoryMappings { get; set; } = new List<CategoryMapping>();
+
 }

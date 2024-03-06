@@ -15,23 +15,9 @@ namespace BudgetApp.Controllers
 
         public IActionResult Index()
         {
-            BudgetCategory budgCatIns = new BudgetCategory
-            {
-                CategoryName = "Fast Food",
-                Amount = (decimal)100.00
-            };
-
-            using (BudgetAppContext dc = new BudgetAppContext())
-            {
-
-                //dc.BudgetCategories.Add(budgCatIns);
-                //dc.SaveChanges();
-
-                List<BudgetCategory> budgetCats = dc.BudgetCategories.ToList();
-            }
-
+           
             return View();
-        }
+        }        
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

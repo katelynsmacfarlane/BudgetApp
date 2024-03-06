@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "File";
+}
+
+<h1>File Upload</h1>
+
+<h3>Please select your transactions file.</h3>
+<div>
+    <form asp-action="FileUpload" enctype="multipart/form-data">
+        <h4>Currently only processing Chase Bank Credit Card statements.</h4>
+        <hr />
+        <dl class="row">
+            <dt class = "col-sm-2">
+                <input type="file" name="TransFile" />
+            </dt>
+        </dl>
+    
+        <input type="submit" value="Upload" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

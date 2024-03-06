@@ -17,6 +17,8 @@ public partial class BudgetAppContext : DbContext
 
     public virtual DbSet<BudgetCategory> BudgetCategories { get; set; }
 
+    public virtual DbSet<CategoryMapping> CategoryMappings { get; set; }
+
     public virtual DbSet<Transaction> Transactions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -34,6 +36,24 @@ public partial class BudgetAppContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.Amount).HasColumnType("decimal(18, 0)");
+        });
+
+        modelBuilder.Entity<CategoryMapping>(entity =>
+        {
+            entity.HasKey(e => e.Cmid).HasName("PK__tmp_ms_x__F67C768E5F88192A");
+
+            entity.ToTable("CategoryMapping");
+
+            entity.Property(e => e.Cmid).HasColumnName("CMId");
+            entity.Property(e => e.CategoryName)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Keyword).IsUnicode(false);
+
+            entity.HasOne(d => d.CategoryNameNavigation).WithMany(p => p.CategoryMappings)
+                .HasForeignKey(d => d.CategoryName)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CategoryMapping_BudgetCategory");
         });
 
         modelBuilder.Entity<Transaction>(entity =>
