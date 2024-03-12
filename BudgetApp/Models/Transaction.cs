@@ -14,4 +14,6 @@ public partial class Transaction
     public string? CategoryName { get; set; }
 
     public virtual BudgetCategory? CategoryNameNavigation { get; set; }
+
+    public DateOnly? TransDate { get; set; }
 }

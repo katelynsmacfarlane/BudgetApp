@@ -192,6 +192,19 @@ namespace BudgetApp.Controllers
             stream.Close();
             List<Transaction> transList = ReadPDF(FileNameOnServer);
 
+            // Save to database
+            foreach (Transaction trans in transList)
+            {
+                if (ModelState.IsValid)
+                {
+                    trans.CategoryName = LookupCategory(trans.TransName);
+                    if (!TransactionExists(trans.TransName, trans.TransDate))
+                    {
+                        _context.Add(trans);
+                    }
+                }
+            }
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -200,13 +213,15 @@ namespace BudgetApp.Controllers
         {
             //Get all text from file
             using PdfDocument PDF = PdfDocument.FromFile(fileName);
-            string AllText2 = PDF.ExtractAllText();
+            string AllText = PDF.ExtractAllText();
 
-            List<string> lineArr = AllText2.Split("\n").ToList();
+            List<string> lineArr = AllText.Split("\n").ToList();
             int transStartIndex = lineArr.IndexOf("Transaction Merchant Name or Transaction Description $ Amount\r");
             List<string> transList = lineArr.Skip(transStartIndex + 1).ToList();
             List<Transaction> negatives = new List<Transaction>();
             List<string> positives = new List<string>();
+
+            // Iterate through each line in PDF for transaction details
             string transLine = "";
             int transIndex = -1;
             while (!transLine.ToUpper().Contains("PLAN FEE") 
@@ -214,16 +229,26 @@ namespace BudgetApp.Controllers
             {
                 if (!transLine.ToUpper().Contains("THANK YOU"))
                 {
-                    Decimal transAmount = 0;
+                    DateOnly transDate = default;
+                    string transDateString = "";
+                    int transDateIndex = 0;
+
+                    Decimal transAmount = 0;                   
                     string transAmountString = "";
                     int transAmountIndex = 0;
+                    
                     List<string> lineItems = transLine.Split(" ").ToList();
                     foreach (string lineItem in lineItems)
                     {
+                        // Look for transaction date in line
+                        if (transDate == default && DateOnly.TryParse(lineItem, out transDate) && lineItem.Contains("/"))
+                        {
+                            transDateString = lineItem;
+                        }
+                        // Look for dollar amount in line
                         if (Decimal.TryParse(lineItem, out transAmount) && lineItem.Contains("."))
                         {
                             transAmountString = lineItem;
-                            //transAmountIndex = lineItems.IndexOf(lineItem);
                             break;
                         }
                     }
@@ -231,9 +256,17 @@ namespace BudgetApp.Controllers
                     if (transAmount != 0)
                     {
                         Transaction newTrans = new Transaction();
+
+                        // Date is first thing in row line and amount is the last thing
+                        transDateIndex = transLine.IndexOf(transDateString);
                         transAmountIndex = transLine.IndexOf(transAmountString);
-                        newTrans.TransName = transLine.Substring(0, transAmountIndex).Trim();
-                        newTrans.Amount = transAmount * -1;
+                        int transDateLength = transDateString.Length + 1;
+
+                        newTrans.TransName = transLine
+                            .Substring((transDateIndex + transDateLength), transAmountIndex - transDateLength)
+                            .Trim();
+                        newTrans.Amount = transAmount * -1; // Assume all transactions are negative for now
+                        newTrans.TransDate = transDate;
                         negatives.Add(newTrans);
                     }
                 }
@@ -245,9 +278,34 @@ namespace BudgetApp.Controllers
             return negatives;
         }
 
+        public string LookupCategory(string transName)
+        {
+            CategoryMapping? cm = _context.CategoryMappings.
+                FirstOrDefault(x => transName.ToLower().Contains(x.Keyword.ToLower()));
+
+            if (cm != null)
+            {
+                return cm.CategoryName;
+            }
+            else
+            {
+                return "Miscellaneous";
+            }
+        }
+
         private bool TransactionExists(int id)
         {
             return _context.Transactions.Any(e => e.TransId == id);
+        }
+        
+        private bool TransactionExists(string transName, DateOnly? transDate)
+        {
+            if (transDate == null)
+            {
+                return false;
+            }
+            return _context.Transactions.Any(e => e.TransName == transName 
+                        && e.TransDate == transDate);
         }
     }
 }
